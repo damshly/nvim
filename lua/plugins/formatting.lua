@@ -3,15 +3,16 @@ return {
   opts = {
     format_on_save = false,
     formatters_by_ft = {
+      lua = { "stylua" },
       javascript = { "prettierd" },
       typescript = { "prettierd" },
-      lua = { "stylua" },
     },
   },
   keys = {
     {
-      "F", 
-      function() require("conform").format({ async = true, lsp_fallback = true }) end,
+
+      "F",
+      function() require("conform").format { async = true, lsp_fallback = true } end,
       desc = "Manual Format",
     },
   },
