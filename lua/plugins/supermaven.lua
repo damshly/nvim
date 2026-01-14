@@ -3,7 +3,7 @@ return {
   config = function()
     require("supermaven-nvim").setup {
       keymaps = {
-        accept_suggestion = "<C-a>",
+        accept_suggestion = "<leader>i",
         clear_suggestion = "<C-x>",
       },
       ignore_filetypes = { "cpp" },
