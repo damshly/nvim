@@ -1,41 +1,44 @@
--- File: lua/plugins/completion.lua
+-- File: lua/plugins/cmp.lua
 return {
   "hrsh7th/nvim-cmp",
-  event = "InsertEnter",
-  dependencies = {
-    "hrsh7th/cmp-nvim-lsp", -- LSP source for cmp
-    "hrsh7th/cmp-buffer", -- Buffer source (words in current file)
-    "hrsh7th/cmp-path", -- Path source (file paths)
-    "L3MON4D3/LuaSnip", -- Snippet engine
-    "saadparwaiz1/cmp_luasnip", -- Snippets source for cmp
-  },
-  config = function()
+  -- بـ AstroNvim بنستخدم opts لتعديل الإعدادات الافتراضية
+  opts = function(_, opts)
     local cmp = require "cmp"
     local luasnip = require "luasnip"
+    require("snippets.js_snippets").setup()
 
-    cmp.setup {
-      snippet = {
-        expand = function(args) luasnip.lsp_expand(args.body) end,
-      },
-      mapping = cmp.mapping.preset.insert {
-        ["<C-k>"] = cmp.mapping.select_prev_item(), -- Previous suggestion
-        ["<C-j>"] = cmp.mapping.select_next_item(), -- Next suggestion
-        ["<C-Space>"] = cmp.mapping.complete(), -- Show suggestions
-        ["<CR>"] = cmp.mapping.confirm {
-          behavior = cmp.ConfirmBehavior.Replace,
-          select = true,
-        }, -- Confirm selection & execute auto-import
-      },
-      sources = cmp.config.sources {
-        { name = "nvim_lsp" }, -- Primary: LSP (Auto-imports come from here)
-        { name = "luasnip" }, -- Secondary: Snippets
-        { name = "buffer" }, -- Tertiary: Current file text
-        { name = "path" }, -- File system paths
-      },
-      window = {
-        completion = cmp.config.window.bordered(), -- Rounded VS Code style
-        documentation = cmp.config.window.bordered(),
+    -- 2. ربط لغات البرمجة ببعضها للقصاصات
+    luasnip.filetype_extend("typescript", { "javascript" })
+    luasnip.filetype_extend("javascriptreact", { "javascript" })
+    luasnip.filetype_extend("typescriptreact", { "javascript" })
+
+    -- 3. دمج الإعدادات تبعك مع إعدادات AstroNvim
+    -- المابينغ (Mappings)
+    opts.mapping = cmp.mapping.preset.insert {
+      ["<C-k>"] = cmp.mapping.select_prev_item(),
+      ["<C-j>"] = cmp.mapping.select_next_item(),
+      ["<C-Space>"] = cmp.mapping.complete(),
+      ["<CR>"] = cmp.mapping.confirm {
+        behavior = cmp.ConfirmBehavior.Replace,
+        select = false,
       },
     }
+    opts.sources = {
+      { name = "luasnip", priority = 1000 }, -- السنيبت أولاً دائماً
+      { name = "nvim_lsp", priority = 750 },
+      { name = "buffer", priority = 500 },
+      { name = "path", priority = 250 },
+    }
+    opts.preselect = cmp.PreselectMode.None
+    -- 5. تجميل النوافذ (Bordered Windows)
+    opts.window = {
+      completion = cmp.config.window.bordered(),
+      documentation = cmp.config.window.bordered(),
+    }
+
+    if not opts.sources then opts.sources = {} end
+    table.insert(opts.sources, { name = "luasnip", priority = 1000 })
+
+    return opts
   end,
 }
