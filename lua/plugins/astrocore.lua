@@ -72,7 +72,19 @@ return {
           end,
           desc = "Close buffer from tabline",
         },
-
+        ["<leader>R"] = {
+          function()
+            -- 1. حفظ الجلسة الحالية يدوياً قبل الخروج
+            require("persistence").save()
+            -- 2. بناء أمر التيرمينال لإعادة التشغيل
+            -- 'exec nvim' بتبدل العملية الحالية بعملية جديدة بنفس التيرمينال
+            -- مع إضافة أمر استعادة الجلسة فوراً عند الفتح
+            vim.cmd "silent! wa" -- حفظ كل الملفات المفتوحة أولاً مشان ما يضيع شغلك
+            vim.fn.jobstart("nvim -c 'lua require(\"persistence\").load()'", { detach = true })
+            vim.cmd "qa!" -- الخروج القسري من النسخة الحالية
+          end,
+          desc = "Hard Restart & Restore Session",
+        },
         -- tables with just a `desc` key will be registered with which-key if it's installed
         -- this is useful for naming menus
         -- ["<Leader>b"] = { desc = "Buffers" },
